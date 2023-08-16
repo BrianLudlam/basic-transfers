@@ -84,44 +84,44 @@ interface IERC20 {
  */
 contract BasicTransfers {
 
-		bool private reentrancyLock = false;
-    modifier nonreentrant {
-        if (reentrancyLock) {
-            revert();
-        }
-        reentrancyLock = true;
-        _;
-        reentrancyLock = false;
-    }
-
-    /**
-     * @dev Moves `amount` of `tokenAddress` tokens from the caller's account to `recipient`.
-     * 
-     * Requires token sender allowance.
-     */
-		function transferToken(
-			address tokenAddress,
-			address recipient,
-			uint256 amount
-		) public nonreentrant {
-			require(amount > 0, "Invalid transfer amount");
-			require(IERC20(tokenAddress).balanceOf(msg.sender) >= amount, "Insufficient token balance");
-			require(IERC20(tokenAddress).allowance(msg.sender, address(this)) >= amount, "Insufficient transfer allowance");
-			
-			IERC20(tokenAddress).transferFrom(msg.sender, recipient, amount);
+	bool private reentrancyLock = false;
+	modifier nonreentrant {
+		if (reentrancyLock) {
+		    revert();
 		}
+		reentrancyLock = true;
+		_;
+		reentrancyLock = false;
+	}
 
-		/**
-     * @dev Moves Eth value sent from the caller's account to `recipient`.
-     */
-		function transferEth(
-			address payable recipient
-		) public payable nonreentrant {
-			require(recipient != address(0), "Invalid recipient address");
-			require(msg.value > 0, "Invalid transfer value");
+	/**
+	* @dev Moves `amount` of `tokenAddress` tokens from the caller's account to `recipient`.
+	* 
+	* Requires token sender allowance.
+	*/
+	function transferToken(
+		address tokenAddress,
+		address recipient,
+		uint256 amount
+	) public nonreentrant {
+		require(amount > 0, "Invalid transfer amount");
+		require(IERC20(tokenAddress).balanceOf(msg.sender) >= amount, "Insufficient token balance");
+		require(IERC20(tokenAddress).allowance(msg.sender, address(this)) >= amount, "Insufficient transfer allowance");
+	
+		IERC20(tokenAddress).transferFrom(msg.sender, recipient, amount);
+	}
 
-      (bool success, ) = recipient.call{value: msg.value}("");
-      require(success, "Recipient call reverted");
-		}
+	/**
+	* @dev Moves Eth value sent from the caller's account to `recipient`.
+	*/
+	function transferEth(
+		address payable recipient
+	) public payable nonreentrant {
+		require(recipient != address(0), "Invalid recipient address");
+		require(msg.value > 0, "Invalid transfer value");
+
+		(bool success, ) = recipient.call{value: msg.value}("");
+		require(success, "Recipient call reverted");
+	}
 }
 
